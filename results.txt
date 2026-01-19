@@ -1,0 +1,118 @@
+
+java 11 cass 5.0.5
+
+2025-08-25T22:09:07.584+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:09:08.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:09:08.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:09:08.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts
+2025-08-25T22:09:09.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts complete: 1 sec, 658 inserts, 658 ins/sec
+2025-08-25T22:09:09.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:09:09.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects
+2025-08-25T22:09:10.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects complete: 1 sec, 845 selects, 845 select/sec
+2025-08-25T22:09:10.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:09:10.758+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:09:10.820+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:09:10.820+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:09:10.820+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts
+2025-08-25T22:09:11.821+03:00  INFO 33551 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  48460 of 200000, 48460 ins/sec
+2025-08-25T22:09:12.821+03:00  INFO 33551 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  104713 of 200000, 56253 ins/sec
+2025-08-25T22:09:13.821+03:00  INFO 33551 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  156615 of 200000, 51902 ins/sec
+2025-08-25T22:09:14.613+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 300 threads, 3 sec, 200300 inserts, 66766 select/sec
+2025-08-25T22:09:14.613+03:00  INFO 33551 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+
+
+
+java 17 cass 5.0.5
+
+2025-08-25T22:26:00.362+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:26:01.605+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:26:01.605+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:26:01.605+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts
+2025-08-25T22:26:02.605+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts complete: 1 sec, 705 inserts, 705 ins/sec
+2025-08-25T22:26:02.605+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:26:02.605+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects
+2025-08-25T22:26:03.605+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects complete: 1 sec, 732 selects, 732 select/sec
+2025-08-25T22:26:03.606+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:26:03.606+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:26:03.680+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:26:03.680+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:26:03.680+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts
+2025-08-25T22:26:04.681+03:00  INFO 36277 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  53047 of 200000, 53047 ins/sec
+2025-08-25T22:26:07.085+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 300 threads, 3 sec, 200300 inserts, 66766 insert/sec
+2025-08-25T22:26:07.085+03:00  INFO 36277 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+
+2025-08-25T22:27:42.840+03:00  INFO 37130 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 50 threads, 10 sec, 200050 inserts, 20005 insert/sec
+
+Если взять latest конфигруацию
+
+2025-08-25T22:34:06.126+03:00  INFO 37912 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 50 threads, 10 sec, 200050 inserts, 20005 insert/sec
+
+2025-08-25T22:34:57.962+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:34:59.631+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:34:59.632+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:34:59.632+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts
+2025-08-25T22:35:09.632+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts complete: 10 sec, 8529 inserts, 852 ins/sec
+2025-08-25T22:35:09.633+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:35:09.633+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects
+2025-08-25T22:35:19.633+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects complete: 10 sec, 8361 selects, 836 select/sec
+2025-08-25T22:35:19.633+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:35:19.633+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:35:19.778+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:35:19.778+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:35:19.778+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts
+2025-08-25T22:35:20.778+03:00  INFO 38241 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  17646 of 200000, 17646 ins/sec
+2025-08-25T22:35:21.778+03:00  INFO 38241 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  36858 of 200000, 19212 ins/sec
+2025-08-25T22:35:22.778+03:00  INFO 38241 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  56228 of 200000, 19370 ins/sec
+2025-08-25T22:35:23.778+03:00  INFO 38241 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  75026 of 200000, 18798 ins/sec
+2025-08-25T22:35:24.778+03:00  INFO 38241 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  94025 of 200000, 18999 ins/sec
+2025-08-25T22:35:25.779+03:00  INFO 38241 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  113960 of 200000, 19935 ins/sec
+2025-08-25T22:35:30.236+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 50 threads, 10 sec, 200050 inserts, 20005 insert/sec
+2025-08-25T22:35:30.237+03:00  INFO 38241 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+
+
+java 17 cass 5.0.5 Запуск с флешки
+
+2025-10-05T12:09:22.393+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-10-05T12:09:22.504+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-10-05T12:09:22.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-10-05T12:09:22.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts
+2025-10-05T12:09:23.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts complete: 1 sec, 679 inserts, 679 ins/sec
+2025-10-05T12:09:23.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-10-05T12:09:23.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects
+2025-10-05T12:09:24.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects complete: 1 sec, 983 selects, 983 select/sec
+2025-10-05T12:09:24.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-10-05T12:09:24.505+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-10-05T12:09:24.545+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-10-05T12:09:24.545+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-10-05T12:09:24.545+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts
+2025-10-05T12:09:25.546+03:00  INFO 4925 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  14624 of 200000, 14624 ins/sec
+2025-10-05T12:09:26.546+03:00  INFO 4925 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  33708 of 200000, 19084 ins/sec
+2025-10-05T12:09:27.546+03:00  INFO 4925 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  55745 of 200000, 22037 ins/sec
+2025-10-05T12:09:28.546+03:00  INFO 4925 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  82157 of 200000, 26412 ins/sec
+2025-10-05T12:09:29.546+03:00  INFO 4925 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  113368 of 200000, 31211 ins/sec
+2025-10-05T12:09:30.546+03:00  INFO 4925 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  138060 of 200000, 24692 ins/sec
+2025-10-05T12:09:31.547+03:00  INFO 4925 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  175579 of 200000, 37519 ins/sec
+2025-10-05T12:09:32.198+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 50 threads, 7 sec, 200050 inserts, 28578 insert/sec
+2025-10-05T12:09:32.199+03:00  INFO 4925 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+cass 4
+
+
+2025-08-25T22:53:15.070+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:53:16.104+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:53:16.104+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:53:16.104+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts
+2025-08-25T22:53:26.105+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts complete: 10 sec, 8408 inserts, 840 ins/sec
+2025-08-25T22:53:26.105+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:53:26.105+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects
+2025-08-25T22:53:36.106+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects complete: 10 sec, 8305 selects, 830 select/sec
+2025-08-25T22:53:36.106+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:53:36.106+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2025-08-25T22:53:36.213+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2025-08-25T22:53:36.213+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2025-08-25T22:53:36.213+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts
+2025-08-25T22:53:37.213+03:00  INFO 43501 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  51247 of 200000, 51247 ins/sec
+2025-08-25T22:53:38.217+03:00  INFO 43501 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  107063 of 200000, 55816 ins/sec
+2025-08-25T22:53:39.952+03:00  INFO 43501 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 300 threads, 3 sec, 200300 inserts, 66766 insert/sec

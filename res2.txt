@@ -1,0 +1,161 @@
+cass 5.0.5 cpuset0, java11
+
+inserts  9760 ins/sec
+
+
+checkSelects 12394 select/sec
+
+
+checkMultithreadInserts 100150 insert/sec
+
+2026-01-02T18:06:02.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2026-01-02T18:06:02.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts
+2026-01-02T18:06:12.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkInserts complete: 10 sec, 97603 inserts, 9760 ins/sec
+2026-01-02T18:06:12.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2026-01-02T18:06:12.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects
+2026-01-02T18:06:22.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkSelects complete: 10 sec, 87020 selects, 8702 select/sec
+2026-01-02T18:06:22.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2026-01-02T18:06:22.112+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable
+2026-01-02T18:06:22.162+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : clearTable complete
+2026-01-02T18:06:22.163+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+2026-01-02T18:06:22.163+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts
+2026-01-02T18:06:23.164+03:00  INFO 12869 --- [cass.check] [     sentinel-0] r.d.cass.check.service.CheckerService    :  68307 of 200000, 68307 ins/sec
+2026-01-02T18:06:25.037+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : checkMultithreadInserts complete: 300 threads, 2 sec, 200300 inserts, 100150 insert/sec
+2026-01-02T18:06:25.037+03:00  INFO 12869 --- [cass.check] [           main] r.d.cass.check.service.CheckerService    : ----------
+
+
+----
+
+
+огриначения через cgroup
+
+создание группы
+mkdir /sys/fs/cgroup/cass5
+
+перемещение в эту группу PID процесса
+echo 7302 > /sys/fs/cgroup/cass5/cgroup.procs
+
+удаление из группы (перемещение в общую)
+echo 7302 > /sys/fs/cgroup/cgroup.procs
+
+
+
+проверить сколько потребляет группа
+
+systemd-cgtop cass5
+
+--
+ограничить колическо CPU на группу
+echo 0 >/sys/fs/cgroup/cpuset/cass5/cpuset.cpus
+echo 0,1 > /sys/fs/cgroup/cass5/cpuset.cpus
+
+проверить сколько CPU доступно процессу
+
+$ cat /proc/7302/status |grep '_allowed'
+
+касс на одном ЦПУ - фризит при сборке мусора в GC
+--
+
+Ограничить io диска
+
+root@dude-MAIN:/sys/fs/cgroup/cass5# ls -l /dev/nvme0n1p6
+brw-rw---- 1 root disk 259, 6 янв  2 15:30 /dev/nvme0n1p6
+
+
+
+# Ограничить чтение до 10 МБ/с и запись до 5 МБ/с
+echo "259:0 rbps=10485760 wbps=5242880" > io.max
+
+1 mb/sec
+echo "259:0 rbps=1048576 wbps=1048576" > io.max
+
+# Ограничить до 100 операций чтения и 50 операций записи в секунду
+
+echo "8:0 riops=100 wiops=50" > io.max
+
+Снятие лимитов:
+Установите значение max (например, rbps=max).
+----
+
+Итого органичения диска: при сбросе инфы на диск - просадка произвидельности, ошибки со стороны узла кассандры, TLE
+
+
+-----------------
+
+проверяю сколько умещается в memory-table
+cass 4
+breaked by new sstable count: 585513
+breaked by new sstable count: 588125
+
+скорость примерно 40к в сек
+
+
+cass 5
+
+
+breaked by new sstable count: 601544
+breaked by new sstable count: 607463
+breaked by new sstable count: 607323
+скорость примерно 40к в сек
+
+
+разница
+19198 / 588125 ≈ 0,03264272051
+
+примерно 3%
+
+
+установил явно memtable = trie
+>> breaked by new sstable count: 599294
+
+
+попробовал trie как default
+и memtable_allocation_type: offheap_buffers
+
+скорость примерно 40к в секунду
+
+>> breaked by new sstable count: 569705
+
+
+и  memtable_allocation_type: offheap_objects
+>> breaked by new sstable count: 1221360
+
+как будто в два раза больше получается
+
+
+----
+
+чтобы включить trie в memtable таблицах
+
+    memtable:
+      configurations:
+        skiplist:
+          class_name: SkipListMemtable
+        trie:
+          class_name: TrieMemtable
+        default:
+          inherits: trie
+
+чтобы включить trie в сс таблицах
+
+    sstable:
+      selected_format: bti
+
+
+-----
+
+
+cass4
+40к-38к
+
+
+cass5
+java 11 : 45к
+
+java 17 : 45к G1 15%
+
+java 17 : 45к ZGC 15%
+
+
+
+java 17 heap 16G : 45к ZGC 15%
