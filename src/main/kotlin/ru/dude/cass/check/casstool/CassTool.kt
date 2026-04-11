@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 
 
 /**
@@ -71,12 +72,14 @@ class CassTool(propertyFilePath: String) {
 
         when (config.cassVersion) {
             CassVersion.CASS_4,
-            CassVersion.CASS_5 -> shellRunner.runCommand(config.cassPath, "${config.cassBinFile} -p $pidFile")
+            CassVersion.CASS_5 -> shellRunner.runCommand(".", "${config.cassBinFile} -p $pidFile")
 
-            CassVersion.SCYLLA -> shellRunner.runAsyncFormShFile(
-                config.cassPath,
+             CassVersion.SCYLLA -> shellRunner.runAsyncFormShFile(
+                ".",
                 config.cassBinFile
-            )
+            ).also { pid ->
+                 Files.writeString(Path.of(pidFile), pid,  StandardOpenOption.CREATE)
+             }
         }
 
     }
@@ -106,7 +109,7 @@ class CassTool(propertyFilePath: String) {
 
         }
 
-        val pid = Files.readString(Path.of(config.cassPath + "/$pidFile"))
+        val pid = Files.readString(Path.of(pidFile))
         val psInfo = shellRunner.runCommand(".", "ps -o command -p $pid").split("\n").getOrNull(1)
 
 
@@ -123,12 +126,9 @@ class CassTool(propertyFilePath: String) {
 
         } ?: "Unknown"
 
-        val tablePhoneInfo = shellRunner.runCommand("${config.cassPath}/bin",
-            listOf("cqlsh", "127.0.0.1", config.cassNativePort.toString(), "-e", "DESC store.phone")
-        )
-
         val ssTablesPhoneDir = File(config.keyspaceStoreDirectory).listFiles().first{it.name.startsWith("phone-")}
-        val ssTablesPhoneFormat =  ssTablesPhoneDir.listFiles().first { it.name.endsWith("-Data.db") }.let { it.name }.let { it.substringBeforeLast('-').substringAfterLast('-') }
+        val ssTablesPhoneFormat =
+            ssTablesPhoneDir.listFiles().first { it.name.endsWith("-Data.db") }.name.substringBeforeLast('-').substringAfterLast('-')
 
         return CassandraRunInfo(javaVersion , CassandraGC.byPsInfo(psInfo), config.cassVersion.name, ssTablesPhoneFormat)
     }
@@ -138,15 +138,24 @@ class CassTool(propertyFilePath: String) {
         if (cassIsRunning(false)) {
             logger.info("${config.cassVersion} stopping...")
 
-            val pid = Files.readString(Path.of(config.cassPath, pidFile))
-            shellRunner.runCommand(config.cassPath, "kill $pid")
+            val pidFile = Path.of(".", pidFile)
 
-            logger.info("${config.cassVersion} stopping awaiting...")
+            val pid = Files.readString(pidFile).trim()
+
+            if (pid.toIntOrNull() == null) {
+                logger.info("${config.cassVersion} invalid PID [$pid]. Stop is aborted.")
+                return
+            }
+            shellRunner.runCommand(".", "kill $pid")
+
+            logger.info("${config.cassVersion} PID $pid stopping awaiting...")
 
             while (cassIsRunning(true)) {
                 Thread.sleep(500)
             }
             println("done")
+
+            Files.deleteIfExists(pidFile)
 
             logger.info("${config.cassVersion} stopped")
         } else {
@@ -191,7 +200,7 @@ class CassTool(propertyFilePath: String) {
 
     fun tableOnDiscSizeMb(tableName: String): Long {
 
-        val totalSize = File("${config.cassPath}/data/data/store")
+        val totalSize = File(config.keyspaceStoreDirectory)
             .listFiles { _, name -> name.startsWith("$tableName-") }
             .sumOf { f -> dirSize(f) }
 

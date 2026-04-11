@@ -1,8 +1,6 @@
 package ru.dude.cass.check.casstool
 
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
 
 
 /**
@@ -36,7 +34,7 @@ class ShellRun {
 
     /**
      * Запуск через подготовленный bash script
-     * Скрипт дожен пистаь в out запущенный pid процесса
+     * Скрипт должен записать в out запущенный pid процесса
      */
     fun runAsyncFormShFile(workDir: String, command: String): String {
         val process = ProcessBuilder(listOf("bash", command))
@@ -49,7 +47,6 @@ class ShellRun {
 
         val pid = Regex("""\d+""").find(output)?.value.orEmpty()
         println("PID: $pid")
-        Files.writeString(Path.of(CassTool.pidFile), pid)
 
         process.waitFor() // Wait for the process to complete
 
@@ -57,7 +54,7 @@ class ShellRun {
             throw RuntimeException("Command failed with exit code ${process.exitValue()}: $output")
         }
 
-        return output
+        return pid
 
     }
 

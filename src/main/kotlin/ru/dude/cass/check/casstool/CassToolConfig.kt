@@ -38,6 +38,12 @@ class CassToolConfig(val propertyFilePath: String) {
         CassVersion.SCYLLA -> properties.getProperty("casstool.scylla.path")
     }
 
+    val cassDataPath = when (cassVersion) {
+        CassVersion.CASS_4 -> properties.getProperty("casstool.cassandra4.data.path")
+        CassVersion.CASS_5 -> properties.getProperty("casstool.cass5.data.path")
+        CassVersion.SCYLLA -> properties.getProperty("casstool.scylla.data.path")
+    }
+
     val createKeyspaceScriptPath = when (cassVersion) {
         CassVersion.CASS_4 -> properties.getProperty("casstool.cass4.create-keyspace-script")
         CassVersion.CASS_5 -> properties.getProperty("casstool.cass5.create-keyspace-script")
@@ -52,6 +58,7 @@ class CassToolConfig(val propertyFilePath: String) {
     }
 
 
+    private val scyllaRunAsDaemonScriptSh = properties.getProperty("casstool.scylla.run-as-daemon-script")
 
 
 
@@ -59,15 +66,15 @@ class CassToolConfig(val propertyFilePath: String) {
         CassVersion.CASS_4,
         CassVersion.CASS_5 -> "$cassPath/bin/cassandra"
 
-        CassVersion.SCYLLA -> "$cassPath/scylla_run_as_daemon.sh"
+        CassVersion.SCYLLA -> scyllaRunAsDaemonScriptSh
     }
 
 
     val cassNodetoolFile = "$cassPath/bin/nodetool"
 
-    val cqlshFile = "$cassPath/bin/cqlsh"
+   // val cqlshFile = "$cassPath/bin/cqlsh"
 
-    val keyspaceStoreDirectory =  "$cassPath/data/data/store"
+    val keyspaceStoreDirectory =  "${cassDataPath}/store"
 
     //для подключения через nodetool
     val cassJmxPort = intFromFirstLine(readAllLines(cassEnvFile), "JMX_PORT=")
