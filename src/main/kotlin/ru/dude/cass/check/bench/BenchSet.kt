@@ -5,6 +5,7 @@ package ru.dude.cass.check.bench
  * Date: 13.02.2026
  */
 data class BenchSet(
+    val enabled: Boolean = false,
     val name: Processors,
     val title: String,
     val insertCount: String = "1_000_000",

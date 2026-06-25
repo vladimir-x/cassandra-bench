@@ -26,7 +26,7 @@ class ShellRun {
         process.waitFor() // Wait for the process to complete
 
         if (process.exitValue() != 0) {
-            throw RuntimeException("Command failed with exit code ${process.exitValue()}: $output")
+            throw RuntimeException("Command ${workDir} ${commandParts} failed with exit code ${process.exitValue()}: $output")
         }
 
         return output

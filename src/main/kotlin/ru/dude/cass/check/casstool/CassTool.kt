@@ -62,9 +62,11 @@ class CassTool(propertyFilePath: String) {
     }
 
     fun cassCollectInfo() {
-        logger.info("${config.cassVersion} collecting context info")
+        logger.info("${config.cassVersion} collecting context info...")
 
         runInfo = cassInfo()
+
+        logger.info("Cass collected Info: {}", runInfo)
 
     }
 
@@ -89,7 +91,12 @@ class CassTool(propertyFilePath: String) {
         return try {
 
             val stat = cassStatus()
-            return stat.contains("UN")
+            if (stat.contains("UN")) {
+                val cassVersion = cassServerVersion()
+                logger.info("CASS srv_node_version: {}",cassVersion)
+                true
+            } else
+                false
         } catch (_: RuntimeException) {
             false
         } finally {
@@ -102,10 +109,20 @@ class CassTool(propertyFilePath: String) {
 
     fun cassStatus() = shellRunner.runCommand(config.cassPath, "${config.cassNodetoolFile} status")
 
+    fun cassServerVersion(): String {
+        val showVersion = "SHOW VERSION;"
+        val res= shellRunner.runCommand("${config.cassPath}/bin",
+            listOf("cqlsh", "127.0.0.1", config.cassNativePort.toString(), "-e", showVersion)
+        )
+        return res.split("|").getOrNull(1) ?: throw Exception("Cassandra version invalid")
+    }
+
     fun cassInfo(): CassandraRunInfo {
 
+        val serverVersion = cassServerVersion()
+
         if (config.cassVersion == CassVersion.SCYLLA) {
-            return CassandraRunInfo.SCYLLA
+            return CassandraRunInfo.SCYLLA(serverVersion)
 
         }
 
@@ -128,7 +145,8 @@ class CassTool(propertyFilePath: String) {
 
         val ssTablesPhoneDir = File(config.keyspaceStoreDirectory).listFiles().first{it.name.startsWith("phone-")}
         val ssTablesPhoneFormat =
-            ssTablesPhoneDir.listFiles().first { it.name.endsWith("-Data.db") }.name.substringBeforeLast('-').substringAfterLast('-')
+            ssTablesPhoneDir.listFiles()
+                .firstOrNull { it.name.endsWith("-Data.db") }?.let { it.name.substringBeforeLast('-').substringAfterLast('-') } ?: ""
 
         return CassandraRunInfo(javaVersion , CassandraGC.byPsInfo(psInfo), config.cassVersion.name, ssTablesPhoneFormat)
     }

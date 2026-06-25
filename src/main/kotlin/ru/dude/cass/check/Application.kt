@@ -19,7 +19,7 @@ internal class Application(
 
     override fun run(vararg args: String?) {
 
-        benchSetProperties.benches.values.forEach { bs ->
+        benchSetProperties.benches.values.filter { it.enabled }.forEach { bs ->
             benchRunner.runOneSet(bs)
         }
     }

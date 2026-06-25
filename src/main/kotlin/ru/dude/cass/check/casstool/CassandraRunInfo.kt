@@ -13,7 +13,7 @@ data class CassandraRunInfo(
 ) {
     companion object {
         val UNDEFINED = CassandraRunInfo("Undefined", CassandraGC.UNKNOWN, "Undefined", "Undefined")
-        val SCYLLA = CassandraRunInfo("-", CassandraGC.UNKNOWN, "Scylla", "Scylla")
+        fun SCYLLA(srvVersion: String) = CassandraRunInfo("-", CassandraGC.UNKNOWN, srvVersion, "Scylla")
     }
 }
 
