@@ -74,7 +74,13 @@ class CassTool(propertyFilePath: String) {
 
         when (config.cassVersion) {
             CassVersion.CASS_4,
-            CassVersion.CASS_5 -> shellRunner.runCommand(".", "${config.cassBinFile} -p $pidFile")
+            CassVersion.CASS_5 -> {
+                val env = mapOf("JAVA_HOME" to config.selectedJavaHome)
+
+                config.updateCassJvmServerOptions()
+
+                shellRunner.runCommand(".", "${config.cassBinFile} -p $pidFile", env)
+            }
 
              CassVersion.SCYLLA -> shellRunner.runAsyncFormShFile(
                 ".",
@@ -97,6 +103,22 @@ class CassTool(propertyFilePath: String) {
                 true
             } else
                 false
+        } catch (_: RuntimeException) {
+            false
+        } finally {
+            if (printDot) {
+                print(".")
+            }
+        }
+    }
+
+
+    fun pidExisted(pid: String, printDot: Boolean): Boolean {
+        return try {
+
+            val command = shellRunner.runCommand(".", "ps -o command -p $pid").split("\n").getOrNull(1)
+            return command != null
+
         } catch (_: RuntimeException) {
             false
         } finally {
@@ -143,12 +165,14 @@ class CassTool(propertyFilePath: String) {
 
         } ?: "Unknown"
 
+        val xmx = Regex("""-Xmx\S+""").find(psInfo)?.value ?: "Undefined"
+
         val ssTablesPhoneDir = File(config.keyspaceStoreDirectory).listFiles().first{it.name.startsWith("phone-")}
         val ssTablesPhoneFormat =
             ssTablesPhoneDir.listFiles()
                 .firstOrNull { it.name.endsWith("-Data.db") }?.let { it.name.substringBeforeLast('-').substringAfterLast('-') } ?: ""
 
-        return CassandraRunInfo(javaVersion , CassandraGC.byPsInfo(psInfo), config.cassVersion.name, ssTablesPhoneFormat)
+        return CassandraRunInfo(javaVersion , CassandraGC.byPsInfo(psInfo), xmx, config.cassVersion.name, ssTablesPhoneFormat)
     }
 
     fun cassStop() {
@@ -169,6 +193,10 @@ class CassTool(propertyFilePath: String) {
             logger.info("${config.cassVersion} PID $pid stopping awaiting...")
 
             while (cassIsRunning(true)) {
+                Thread.sleep(500)
+            }
+
+            while (pidExisted(pid, true)){
                 Thread.sleep(500)
             }
             println("done")

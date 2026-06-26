@@ -14,11 +14,14 @@ class ShellRun {
      * Запускает переданную комманду
      */
 
-    fun runCommand(workDir: String, command: String) = runCommand(workDir, command.split(" "))
+    fun runCommand(workDir: String, command: String, env: Map<String, String> = emptyMap()) = runCommand(workDir, command.split(" "), env)
 
-    fun runCommand(workDir: String, commandParts: List<String>): String {
+    fun runCommand(workDir: String, commandParts: List<String>, env: Map<String, String> = emptyMap()): String {
         val process = ProcessBuilder(commandParts)
             .directory(File(workDir))
+            .also {
+                it.environment().putAll(env)
+            }
             .redirectErrorStream(true) // Combine standard error and standard output
             .start()
 
@@ -27,6 +30,10 @@ class ShellRun {
 
         if (process.exitValue() != 0) {
             throw RuntimeException("Command ${workDir} ${commandParts} failed with exit code ${process.exitValue()}: $output")
+        }
+
+        if (output.contains("Program will exit")) {
+            throw RuntimeException("Command ${workDir} ${commandParts} failed  with message: $output")
         }
 
         return output

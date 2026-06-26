@@ -8,12 +8,13 @@ package ru.dude.cass.check.casstool
 data class CassandraRunInfo(
     val javaVesion: String,
     val gc: CassandraGC,
+    val xmx: String,
     val cassVersion: String,
     val ssTableFormat: String,
 ) {
     companion object {
-        val UNDEFINED = CassandraRunInfo("Undefined", CassandraGC.UNKNOWN, "Undefined", "Undefined")
-        fun SCYLLA(srvVersion: String) = CassandraRunInfo("-", CassandraGC.UNKNOWN, srvVersion, "Scylla")
+        val UNDEFINED = CassandraRunInfo("Undefined", CassandraGC.UNKNOWN, "Undefined","Undefined", "Undefined")
+        fun SCYLLA(srvVersion: String) = CassandraRunInfo("-", CassandraGC.UNKNOWN, "Undefined", srvVersion, "Scylla")
     }
 }
 

@@ -1,9 +1,11 @@
 package ru.dude.cass.check.casstool
 
 import ru.dude.cass.check.casstool.CassTool.CassVersion
+import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import java.util.Properties
 import kotlin.io.path.exists
 
@@ -53,13 +55,16 @@ class CassToolConfig(val propertyFilePath: String) {
     private val cassEnvFile = "$cassPath/conf/cassandra-env.sh"
     private val cassYamlFile = when (cassVersion) {
         CassVersion.CASS_4,
-        CassVersion.CASS_5 ->  "$cassPath/conf/cassandra.yaml"
-        CassVersion.SCYLLA ->  "$cassPath/conf/scylla.yaml"
+        CassVersion.CASS_5 -> "$cassPath/conf/cassandra.yaml"
+
+        CassVersion.SCYLLA -> "$cassPath/conf/scylla.yaml"
     }
+
+    private val cassJvmServerOptsFile = "$cassPath/conf/jvm-server.options"
+    private val cassJvmServerOptsCopyFile = "$cassPath/conf/jvm-server-cp.options"
 
 
     private val scyllaRunAsDaemonScriptSh = properties.getProperty("casstool.scylla.run-as-daemon-script")
-
 
 
     val cassBinFile = when (cassVersion) {
@@ -69,12 +74,18 @@ class CassToolConfig(val propertyFilePath: String) {
         CassVersion.SCYLLA -> scyllaRunAsDaemonScriptSh
     }
 
+    val selectedJavaHome = when (properties.getProperty("casstool.java.version")) {
+        "java11" -> properties.getProperty("casstool.java11.home")
+        "java17" -> properties.getProperty("casstool.java17.home")
+        else -> throw Exception("Unexpected Java version")
+    }
+
 
     val cassNodetoolFile = "$cassPath/bin/nodetool"
 
-   // val cqlshFile = "$cassPath/bin/cqlsh"
+    // val cqlshFile = "$cassPath/bin/cqlsh"
 
-    val keyspaceStoreDirectory =  "${cassDataPath}/store"
+    val keyspaceStoreDirectory = "${cassDataPath}/store"
 
     //для подключения через nodetool
     val cassJmxPort = intFromFirstLine(readAllLines(cassEnvFile), "JMX_PORT=")
@@ -83,6 +94,49 @@ class CassToolConfig(val propertyFilePath: String) {
     val cassNativePort = intFromFirstLine(readAllLines(cassYamlFile), "native_transport_port:")
 
     val cassKeyspaceName = properties.getProperty("spring.cassandra.keyspace-name")
+
+    fun updateCassJvmServerOptions() {
+
+        val optXmx = properties.getProperty("casstool.java.xmx", "-Xmx2g").trim()
+        val optXms = properties.getProperty("casstool.java.xms", "-Xms2g").trim()
+        val propGc = properties.getProperty("casstool.java.gc", "G1")
+        val optGC = when {
+            propGc.equals("CMS", ignoreCase = true) -> "-XX:+UseConcMarkSweepGC"
+            propGc.equals("G1", ignoreCase = true) -> "-XX:+UseG1GC"
+            propGc.equals("ZGC", ignoreCase = true) -> "-XX:+UseZGC"
+            else -> "-XX:+UseG1GC"
+        }
+
+
+        val optsFile = File(cassJvmServerOptsFile)
+        val copyFile = File(cassJvmServerOptsCopyFile)
+
+        // 0 Делаем копию настроек, если её ещё нет
+        if (!copyFile.exists()) {
+
+            Files.copy(optsFile.toPath(), copyFile.toPath())
+        }
+
+        // вычитываем настройки из копии
+        val optLines = Files.readAllLines(copyFile.toPath(), Charsets.UTF_8)
+
+        // меняем настройки
+        optLines.forEachIndexed { index, str ->
+            if (str.startsWith("### GC HERE ###")) {
+                optLines[index + 1] = optGC
+            }
+
+            if (str.startsWith("### HEAP HERE ###")) {
+                optLines[index + 1] = optXmx
+                optLines[index + 2] = optXms
+            }
+        }
+
+        // подкладываем настройки
+        Files.writeString(optsFile.toPath(), optLines.joinToString("\n"), Charsets.UTF_8, StandardOpenOption.WRITE)
+
+
+    }
 
     private fun readAllLines(path: String): List<String> {
         return if (Path.of(path).exists()) {
