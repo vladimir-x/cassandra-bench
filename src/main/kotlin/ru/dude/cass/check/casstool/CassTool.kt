@@ -5,6 +5,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import kotlin.io.path.exists
 
 
 /**
@@ -79,15 +80,20 @@ class CassTool(propertyFilePath: String) {
 
                 config.updateCassJvmServerOptions()
 
-                shellRunner.runCommand(".", "${config.cassBinFile} -p $pidFile", env)
+                val outText =shellRunner.runCommand(".", "${config.cassBinFile} -p $pidFile", env)
+                logger.debug(outText)
             }
 
-             CassVersion.SCYLLA -> shellRunner.runAsyncFormShFile(
-                ".",
-                config.cassBinFile
-            ).also { pid ->
-                 Files.writeString(Path.of(pidFile), pid,  StandardOpenOption.CREATE)
+             CassVersion.SCYLLA -> {
+
+                 val (pid, outText) = shellRunner.runAsyncFormShFile(
+                     ".",
+                     config.cassBinFile
+                 )
+                 logger.debug(outText)
+                 Files.writeString(Path.of(pidFile), pid,  StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
              }
+
         }
 
     }
@@ -134,7 +140,7 @@ class CassTool(propertyFilePath: String) {
     fun cassServerVersion(): String {
         val showVersion = "SHOW VERSION;"
         val res= shellRunner.runCommand("${config.cassPath}/bin",
-            listOf("cqlsh", "127.0.0.1", config.cassNativePort.toString(), "-e", showVersion)
+            listOf("cqlsh", config.cassHost, config.cassPort, "-e", showVersion)
         )
         return res.split("|").getOrNull(1) ?: throw Exception("Cassandra version invalid")
     }
@@ -148,8 +154,20 @@ class CassTool(propertyFilePath: String) {
 
         }
 
+
+        if (!Path.of(pidFile).exists()){
+            logger.info("Pid file not exists: {}. Info unavailable", pidFile)
+            return CassandraRunInfo.UNKNOWN(serverVersion)
+        }
+
+
         val pid = Files.readString(Path.of(pidFile))
-        val psInfo = shellRunner.runCommand(".", "ps -o command -p $pid").split("\n").getOrNull(1)
+
+        val psInfo = if (pidExisted(pid, printDot = false)){
+            shellRunner.runCommand(".", "ps -o command -p $pid").split("\n").getOrNull(1)
+        } else {
+            null
+        }
 
 
         if (psInfo == null) {
@@ -218,7 +236,7 @@ class CassTool(propertyFilePath: String) {
 
         val dropCql = "drop KEYSPACE if exists store;"
         shellRunner.runCommand("${config.cassPath}/bin",
-            listOf("cqlsh", "127.0.0.1", config.cassNativePort.toString(), "-e", dropCql)
+            listOf("cqlsh", config.cassHost, config.cassPort, "-e", dropCql)
         )
 
 
@@ -228,7 +246,7 @@ class CassTool(propertyFilePath: String) {
         logger.info("${config.cassVersion} create-keyspace begin...")
 
         // запускаю создание схемы
-        shellRunner.runCommand(".", "cqlsh 127.0.0.1 ${config.cassNativePort} -f ${config.createKeyspaceScriptPath}")
+        shellRunner.runCommand(".", "cqlsh ${config.cassHost} ${config.cassPort} -f ${config.createKeyspaceScriptPath}")
 
         logger.info("${config.cassVersion} create-keyspace complete")
 
@@ -237,18 +255,17 @@ class CassTool(propertyFilePath: String) {
     fun flushAndCompact(tableName: String) {
 
         logger.info("${config.cassVersion} flush")
-        shellRunner.runCommand(config.cassPath, "${config.cassNodetoolFile} flush")
+        shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassNodetoolRmiPort," flush"))
 
         logger.info("${config.cassVersion} compact $tableName")
-        shellRunner.runCommand(config.cassPath, "${config.cassNodetoolFile} compact ${config.cassKeyspaceName} $tableName")
+        shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassNodetoolRmiPort," compact ${config.cassKeyspaceName} $tableName"))
 
     }
 
     fun tableOnDiscSizeMb(tableName: String): Long {
 
         val totalSize = File(config.keyspaceStoreDirectory)
-            .listFiles { _, name -> name.startsWith("$tableName-") }
-            .sumOf { f -> dirSize(f) }
+            .listFiles { _, name -> name.startsWith("$tableName-") } ?.sumOf { f -> dirSize(f) } ?: return 0
 
         return totalSize / 1024 / 1024
     }

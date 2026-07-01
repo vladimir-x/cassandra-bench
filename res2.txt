@@ -159,3 +159,57 @@ java 17 : 45к ZGC 15%
 
 
 java 17 heap 16G : 45к ZGC 15%
+
+
+----
+
+Полезные метрики
+
+curl http://127.0.0.1:7070/metrics | grep -e "cpuload"
+
+java_lang_operatingsystem_processcpuload - только процесс кассандры
+java_lang_operatingsystem_systemcpuload - вся система
+
+GC
+jvm_gc_collection_seconds_sum{gc="G1 Old Generation"} 1.298
+jvm_gc_collection_seconds_sum{gc="G1 Young Generation"} 3.137
+
+
+из этого нужно вычислить
+
+
+Формула (процент от общей доступной мощности CPU):Если на вашем сервере Cassandra выделено, например, 16 ядер, то чтобы получить честный процент от всей системы, разделите метрику на количество ядер:
+
+promql
+sum(rate(jvm_gc_collection_seconds_sum[1m])) by (instance) / count(node_cpu_seconds_total{mode="idle"}) by (instance) * 100
+
+
+
+----
+
+Для сциллы:
+
+scylla_reactor_cpu_busy_ms
+
+promql
+rate(scylla_reactor_cpu_busy_ms_total[1m]) / 1000
+
+
+
+scylla_reactor_utilization  - сразу по ядрам процент загрузки
+
+
+А почему у меня в цилле все токены близко друг к другу ?
+
+ 3880167 | -9223305581386931457
+ 2610353 | -9223301851389035348
+ 3080609 | -9223298921107834070
+  219535 | -9223298118547569987
+ 1567164 | -9223296642471068592
+ 2672313 | -9223294930010333762
+ 2385277 | -9223293783853290351
+ 8334848 | -9223293166593000662
+  227203 | -9223292680983819731
+ 4995041 | -9223291152388846786
+ 1136459 | -9223290436051122500
+

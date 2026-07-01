@@ -82,6 +82,7 @@ class CassToolConfig(val propertyFilePath: String) {
 
 
     val cassNodetoolFile = "$cassPath/bin/nodetool"
+    val cassNodetoolRmiPort = "7199"
 
     // val cqlshFile = "$cassPath/bin/cqlsh"
 
@@ -94,6 +95,10 @@ class CassToolConfig(val propertyFilePath: String) {
     val cassNativePort = intFromFirstLine(readAllLines(cassYamlFile), "native_transport_port:")
 
     val cassKeyspaceName = properties.getProperty("spring.cassandra.keyspace-name")
+
+    //для подключения через cqlsh
+    val cassHost = properties.getProperty("spring.cassandra.contact-points").split(',').map(String::trim).first().split(":")[0]
+    val cassPort = properties.getProperty("spring.cassandra.contact-points").split(',').map(String::trim).first().split(":")[1]
 
     fun updateCassJvmServerOptions() {
 

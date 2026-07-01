@@ -43,7 +43,7 @@ class ShellRun {
      * Запуск через подготовленный bash script
      * Скрипт должен записать в out запущенный pid процесса
      */
-    fun runAsyncFormShFile(workDir: String, command: String): String {
+    fun runAsyncFormShFile(workDir: String, command: String): Pair<String, String> {
         val process = ProcessBuilder(listOf("bash", command))
             .directory(File(workDir))
             .redirectErrorStream(true)
@@ -61,7 +61,7 @@ class ShellRun {
             throw RuntimeException("Command failed with exit code ${process.exitValue()}: $output")
         }
 
-        return pid
+        return pid to output
 
     }
 

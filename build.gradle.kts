@@ -22,6 +22,7 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-cassandra")
+	implementation("com.scylladb:java-driver-core:4.19.0.9")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
