@@ -20,9 +20,27 @@ repositories {
 	mavenCentral()
 }
 
+
+// Определяем переменную для выбора драйвера (по умолчанию cassandra)
+// ./gradlew clean bootRun -PdbDriver=cassandra
+// ./gradlew clean bootRun -PdbDriver=scylla
+val dbDriver = project.findProperty("dbDriver") ?: "cassandra"
+
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-cassandra")
-	implementation("com.scylladb:java-driver-core:4.19.0.9")
+
+	if (dbDriver == "scylla") {
+		// Исключаем стандартный драйвер Cassandra и берем Scylla
+		configurations.all {
+			exclude(group = "com.datastax.oss", module = "java-driver-core")
+		}
+		implementation("com.scylladb:java-driver-core:4.19.0.9")
+	} else {
+		// Используется стандартный драйвер из spring-boot-starter
+		implementation("com.datastax.oss:java-driver-core:4.17.0")
+	}
+
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")

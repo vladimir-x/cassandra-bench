@@ -82,17 +82,15 @@ class CassToolConfig(val propertyFilePath: String) {
 
 
     val cassNodetoolFile = "$cassPath/bin/nodetool"
-    val cassNodetoolRmiPort = "7199"
-
     // val cqlshFile = "$cassPath/bin/cqlsh"
 
     val keyspaceStoreDirectory = "${cassDataPath}/store"
 
     //для подключения через nodetool
-    val cassJmxPort = intFromFirstLine(readAllLines(cassEnvFile), "JMX_PORT=")
+    val cassJmxPort = intFromFirstLine(readAllLines(cassEnvFile), "JMX_PORT=", 7199)
 
     //для подключения через cqlsh
-    val cassNativePort = intFromFirstLine(readAllLines(cassYamlFile), "native_transport_port:")
+    val cassNativePort = intFromFirstLine(readAllLines(cassYamlFile), "native_transport_port:", 9042)
 
     val cassKeyspaceName = properties.getProperty("spring.cassandra.keyspace-name")
 
@@ -166,10 +164,10 @@ class CassToolConfig(val propertyFilePath: String) {
         }
     }
 
-    private fun intFromFirstLine(lines: List<String>, containsPart: String): Int {
+    private fun intFromFirstLine(lines: List<String>, containsPart: String, defaultPort: Int): Int {
         return lines.firstOrNull { it.contains(containsPart) }?.let {
             REGEX_INT.find(it)!!.value.toInt()
-        } ?: -999
+        } ?: -defaultPort
 
     }
 

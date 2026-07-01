@@ -255,10 +255,18 @@ class CassTool(propertyFilePath: String) {
     fun flushAndCompact(tableName: String) {
 
         logger.info("${config.cassVersion} flush")
-        shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassNodetoolRmiPort," flush"))
+        try {
+            shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassJmxPort.toString()," flush"))
+        } catch (e: Exception) {
+            logger.error("Flush ${config.cassVersion} error: ${e.message}")
+        }
 
         logger.info("${config.cassVersion} compact $tableName")
-        shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassNodetoolRmiPort," compact ${config.cassKeyspaceName} $tableName"))
+        try{
+            shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassJmxPort.toString()," compact ${config.cassKeyspaceName} $tableName"))
+        } catch (e: Exception) {
+            logger.error("Compact ${config.cassVersion} error: ${e.message}")
+        }
 
     }
 

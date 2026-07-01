@@ -4,8 +4,9 @@ CREATE KEYSPACE IF NOT EXISTS store
     WITH REPLICATION = {
         'class' : 'SimpleStrategy',
         'replication_factor' : 1
-        };
-
+        }
+AND tablets = {'enabled': false};
+--- tablets работает только с NetworkTopology
 
 -- phone таблица с большим количеством маленьких партиций
 
