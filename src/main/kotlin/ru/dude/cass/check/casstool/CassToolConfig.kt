@@ -24,6 +24,8 @@ class CassToolConfig(val propertyFilePath: String) {
 
     private val properties = openFile()
 
+    val cassPathConfig = CassPathConfig.byProperties(properties)
+
     val cassVersion = CassVersion.valueOf(properties.getProperty("casstool.cassandra.enable-version"))
 
     val startEnable = properties.getProperty("casstool.start.enable").toBoolean()
@@ -44,6 +46,12 @@ class CassToolConfig(val propertyFilePath: String) {
         CassVersion.CASS_4 -> properties.getProperty("casstool.cassandra4.data.path")
         CassVersion.CASS_5 -> properties.getProperty("casstool.cass5.data.path")
         CassVersion.SCYLLA -> properties.getProperty("casstool.scylla.data.path")
+    }
+
+    val cassBinPath = when (cassVersion) {
+        CassVersion.CASS_4 -> properties.getProperty("casstool.cassandra4.bin.path")
+        CassVersion.CASS_5 -> properties.getProperty("casstool.cass5.bin.path")
+        CassVersion.SCYLLA -> properties.getProperty("casstool.scylla.bin.path")
     }
 
     val createKeyspaceScriptPath = when (cassVersion) {

@@ -138,11 +138,12 @@ class CassTool(propertyFilePath: String) {
     fun cassStatus() = shellRunner.runCommand(config.cassPath, "${config.cassNodetoolFile} status")
 
     fun cassServerVersion(): String {
-        val showVersion = "SHOW VERSION;"
-        val res= shellRunner.runCommand("${config.cassPath}/bin",
-            listOf("cqlsh", config.cassHost, config.cassPort, "-e", showVersion)
-        )
-        return res.split("|").getOrNull(1) ?: throw Exception("Cassandra version invalid")
+        val versionText = cqlsh( "SHOW VERSION;")
+        //val showVersion =
+        //val res = shellRunner.runCommand("${config.cassPath}/bin",
+        //    listOf( "cqlsh", config.cassHost, config.cassPort, "-e", showVersion)
+        //)
+        return versionText.split("|").getOrNull(1) ?: throw Exception("Cassandra version invalid")
     }
 
     fun cassInfo(): CassandraRunInfo {
@@ -256,19 +257,47 @@ class CassTool(propertyFilePath: String) {
 
         logger.info("${config.cassVersion} flush")
         try {
-            shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassJmxPort.toString()," flush"))
+            nodetool("flush")
         } catch (e: Exception) {
             logger.error("Flush ${config.cassVersion} error: ${e.message}")
         }
 
         logger.info("${config.cassVersion} compact $tableName")
         try{
-            shellRunner.runCommand(config.cassPath, listOf(config.cassNodetoolFile, "-h", config.cassHost, "-p", config.cassJmxPort.toString()," compact ${config.cassKeyspaceName} $tableName"))
+            nodetool("compact ${config.cassKeyspaceName} $tableName")
         } catch (e: Exception) {
             logger.error("Compact ${config.cassVersion} error: ${e.message}")
         }
 
     }
+
+    fun nodetool(nodeToolCommand: String): String {
+        return shellRunner.runCommand(
+            config.cassPathConfig.nodetoolWorkPath,
+            listOf(
+                config.cassPathConfig.nodetoolBinPath,
+                "-h",
+                config.cassPathConfig.cassHost,
+                "-p",
+                config.cassPathConfig.nodetoolPort,
+                nodeToolCommand
+            )
+        )
+    }
+
+    fun cqlsh(cqlScript: String): String {
+        return shellRunner.runCommand(
+            config.cassPathConfig.cqlshWorkPath,
+            listOf(
+                config.cassPathConfig.cqlshBinPath,
+                config.cassPathConfig.cassHost,
+                config.cassPathConfig.cassPort,
+                "-e",
+                cqlScript
+            )
+        )
+    }
+
 
     fun tableOnDiscSizeMb(tableName: String): Long {
 
