@@ -106,6 +106,9 @@ class CassToolConfig(val propertyFilePath: String) {
     val cassHost = properties.getProperty("spring.cassandra.contact-points").split(',').map(String::trim).first().split(":")[0]
     val cassPort = properties.getProperty("spring.cassandra.contact-points").split(',').map(String::trim).first().split(":")[1]
 
+
+    val pythonBinPath = properties.getProperty("casstool.pythonBinPath")
+
     fun updateCassJvmServerOptions() {
 
         val optXmx = properties.getProperty("casstool.java.xmx", "-Xmx2g").trim()

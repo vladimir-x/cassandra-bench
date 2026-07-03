@@ -286,6 +286,12 @@ class CassTool(propertyFilePath: String) {
     }
 
     fun cqlsh(cqlScript: String): String {
+
+        val env = mutableMapOf<String, String>()
+        if (config.pythonBinPath.isNotBlank()) {
+            env["USER_SPECIFIED_PYTHON"] = config.pythonBinPath
+        }
+
         return shellRunner.runCommand(
             config.cassPathConfig.cqlshWorkPath,
             listOf(
@@ -294,7 +300,8 @@ class CassTool(propertyFilePath: String) {
                 config.cassPathConfig.cassPort,
                 "-e",
                 cqlScript
-            )
+            ),
+            env
         )
     }
 
