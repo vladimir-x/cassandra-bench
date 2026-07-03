@@ -33,3 +33,13 @@ CREATE TABLE IF NOT EXISTS store.phone_by_brand
     PRIMARY KEY (brand, name)
 );
 
+-- phone_counter таблица для работы со счётчиком LWT
+drop table IF EXISTS store.phone_counter;
+CREATE TABLE IF NOT EXISTS store.phone_counter
+(
+    id    bigint,
+    brand text,
+    counter bigint,
+    version bigint,
+    PRIMARY KEY (id)
+);

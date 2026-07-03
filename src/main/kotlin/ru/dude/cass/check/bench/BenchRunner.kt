@@ -54,12 +54,15 @@ class BenchRunner(
 
         logger.info("Data cleared for [{}]", benchSet.name)
 
+        benchProcessor.beforeInserts(rowCount, benchSet)
 
         val st = LocalDateTime.now()
 
         benchProcessor.runBenchInsert(rowCount)
 
         val d = Duration.between(st, LocalDateTime.now())
+
+        benchProcessor.afterInserts(rowCount)
 
 
         if (benchSet.flushAfterInsert) {
@@ -70,11 +73,14 @@ class BenchRunner(
 
         val speed = rowCount / max(1, d.toSeconds())
         summaryLogger.info(
-            "Bench complete | inserts | name: [{}]\t| rowCount: {}\t| speed: {}\tins/sec\t| discSize: {}\tMB | context: {}",
+            "Bench complete | inserts | name: [{}]\t| tag: [{}]\t| rowCount: {}\t| speed: {}\tins/sec\t| discSize: {}\tMB |  threads: {}\t |  cass_ver: {}\t | context: {}",
             benchSet.name,
+            benchSet.tag,
             rowCount,
             speed,
             discSize,
+            runContext.threadsCount,
+            runContext.cassVersion,
             contextInfo
         )
 

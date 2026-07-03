@@ -13,7 +13,10 @@ import ru.dude.cass.check.casstool.CassTool
 class RunContext {
 
     @Value("\${speedtest.multithreads.threads.count}")
-    private var threadsCount: Int = 0
+    var threadsCount: Int = 0
+
+    val cassVersion: String
+        get() = CassTool.INSTANCE.runInfo.cassVersion
 
     /**
      * Информация о том, в каком окружении запускаются тесты:

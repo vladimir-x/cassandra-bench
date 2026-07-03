@@ -12,4 +12,5 @@ enum class Processors {
     find_by_secondary_index,
     find_by_sai,
     find_by_sai_vector,
+    lwt_bench,
 }

@@ -13,7 +13,11 @@ interface Benchable {
 
     fun clear()
 
+    fun beforeInserts(rowCount: Int, benchSet: BenchSet)
+
     fun insert(id: Long)
+
+    fun afterInserts(rowCount: Int)
 
     fun select(id: Int)
 

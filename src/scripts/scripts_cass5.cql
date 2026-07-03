@@ -87,6 +87,18 @@ CREATE TABLE IF NOT EXISTS store.phone_vector_dp
 
 CREATE INDEX IF NOT EXISTS phone_comment_vector ON store.phone_vector_dp (comment_vector) USING 'sai' WITH OPTIONS = { 'similarity_function': 'DOT_PRODUCT' };
 
+
+-- phone_counter таблица для работы со счётчиком LWT
+drop table IF EXISTS store.phone_counter;
+CREATE TABLE IF NOT EXISTS store.phone_counter
+(
+    id    bigint,
+    brand text,
+    counter bigint,
+    version bigint,
+    PRIMARY KEY (id)
+);
+
 -- phone таблица с малым количеством больших партциий (много разных кластерных ключей)
 /*
 drop table IF EXISTS store.display;
@@ -99,3 +111,4 @@ CREATE TABLE IF NOT EXISTS store.display
     PRIMARY KEY ((size), id)
 );
 */
+
