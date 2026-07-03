@@ -1,0 +1,25 @@
+[Unit]
+Description=Apache Cassandra Database
+After=network.target
+
+[Service]
+Type=simple
+User=cassandra
+Group=cassandra
+
+ExecStart=/opt/apache-cassandra-4.1.9/bin/cassandra -f
+Restart=on-failure
+RestartSec=10
+
+# Настройки лимитов ОС для Cassandra (обязательно для работы NoSQL)
+LimitNOFILE=1048576
+LimitNPROC=32768
+LimitMEMLOCK=infinity
+LimitAS=infinity
+
+# Ограничения CPU через cgroups v2 (4 ядра)
+CPUQuota=400%
+AllowedCPUs=1-4
+
+[Install]
+WantedBy=multi-user.target

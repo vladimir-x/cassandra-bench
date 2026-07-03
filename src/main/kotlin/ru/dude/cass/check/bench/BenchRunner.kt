@@ -1,5 +1,6 @@
 package ru.dude.cass.check.bench
 
+import ru.dude.cass.check.tracker.CpuTrackerClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import ru.dude.cass.check.casstool.CassTool
@@ -14,9 +15,10 @@ import kotlin.math.max
  * Date: 13.02.2026
  */
 @Component
-class BenchRunner(
+internal class BenchRunner(
     private val runContext: RunContext,
     private val benchProcessors: List<Benchable>,
+    private val cpuTracker: CpuTrackerClient,
 ) {
 
     companion object {
@@ -56,11 +58,17 @@ class BenchRunner(
 
         benchProcessor.beforeInserts(rowCount, benchSet)
 
+        cpuTracker.startMeasurement()
+
+
         val st = LocalDateTime.now()
+
 
         benchProcessor.runBenchInsert(rowCount)
 
         val d = Duration.between(st, LocalDateTime.now())
+
+        val cpuMetrics = cpuTracker.stopMeasurement()
 
         benchProcessor.afterInserts(rowCount)
 
@@ -73,7 +81,7 @@ class BenchRunner(
 
         val speed = rowCount / max(1, d.toSeconds())
         summaryLogger.info(
-            "Bench complete | inserts | name: [{}]\t| tag: [{}]\t| rowCount: {}\t| speed: {}\tins/sec\t| discSize: {}\tMB |  threads: {}\t |  cass_ver: {}\t | context: {}",
+            "Bench complete | inserts | name: [{}]\t| tag: [{}]\t| rowCount: {}\t| speed: {}\tins/sec\t| discSize: {}\tMB |  threads: {}\t |  cass_ver: {}\t  |  cpu_average: {}\t|  ram_average: {}\t | ram_max: {}\t | context: {}",
             benchSet.name,
             benchSet.tag,
             rowCount,
@@ -81,6 +89,9 @@ class BenchRunner(
             discSize,
             runContext.threadsCount,
             runContext.cassVersion,
+            cpuMetrics?.cpuAverageTotal,
+            cpuMetrics?.ramAverageMb,
+            cpuMetrics?.ramAverageMb,
             contextInfo
         )
 

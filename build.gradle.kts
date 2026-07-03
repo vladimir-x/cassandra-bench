@@ -29,6 +29,8 @@ val dbDriver = project.findProperty("dbDriver") ?: "cassandra"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-cassandra")
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
 	if (dbDriver == "scylla") {
 		// Исключаем стандартный драйвер Cassandra и берем Scylla
