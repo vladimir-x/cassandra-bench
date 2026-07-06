@@ -15,13 +15,13 @@ interface Benchable {
 
     fun beforeInserts(rowCount: Int, benchSet: BenchSet)
 
-    fun insert(id: Long)
+    fun insert(id: Long): Boolean
 
     fun afterInserts(rowCount: Int)
 
     fun select(id: Int)
 
-    fun runBenchInsert(insertCountInt: Int)
+    fun runBenchInsert(insertCountInt: Int): ProcessedResult
 
-    fun runBenchSelect(maxId: Int, selectTimeSec: Int): Int
+    fun runBenchSelect(maxId: Int, selectTimeSec: Int): ProcessedResult
 }

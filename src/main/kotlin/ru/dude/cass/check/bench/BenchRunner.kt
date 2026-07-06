@@ -65,7 +65,7 @@ internal class BenchRunner(
         val st = LocalDateTime.now()
 
 
-        benchProcessor.runBenchInsert(rowCount)
+        val processRes = benchProcessor.runBenchInsert(rowCount)
 
         val d = Duration.between(st, LocalDateTime.now())
 
@@ -80,7 +80,7 @@ internal class BenchRunner(
 
         val discSize = CassTool.INSTANCE.tableOnDiscSizeMb(benchProcessor.tableName)
 
-        val speed = rowCount / max(1, d.toSeconds())
+        val speed = processRes.successedCount / max(1, d.toSeconds())
         summaryLogger.info(
             "Bench complete | inserts | name: [{}]\t| tag: [{}]\t| rowCount: {}\t| speed: {}\tins/sec\t| discSize: {}\tMB |  threads: {}\t |  cass_ver: {}\t  |  cpu_average: {}\t|  ram_average: {}\t | ram_max: {}\t | context: {}",
             benchSet.name,
@@ -100,7 +100,8 @@ internal class BenchRunner(
             "inserts",
             benchSet.name,
             benchSet.tag,
-            rowCount,
+            processRes.successedCount,
+            processRes.errorCount,
             speed,
             discSize,
             runContext.threadsCount,
@@ -122,10 +123,10 @@ internal class BenchRunner(
 
         val st = LocalDateTime.now()
 
-        val selectCount = benchProcessor.runBenchSelect(rowCount, benchSet.selectTimeSec)
+        val processRes = benchProcessor.runBenchSelect(rowCount, benchSet.selectTimeSec)
 
         val d = Duration.between(st, LocalDateTime.now())
-        val speed = selectCount / max(1, d.toSeconds())
+        val speed = processRes.successedCount / max(1, d.toSeconds())
 
         val cpuMetrics = cpuTracker.stopMeasurement()
 
@@ -142,7 +143,9 @@ internal class BenchRunner(
             "selects",
             benchSet.name,
             benchSet.tag,
-            rowCount,
+
+            processRes.successedCount,
+            processRes.errorCount,
             speed,
             0,
             runContext.threadsCount,

@@ -27,8 +27,9 @@ internal class ProcessorFindBySearchTable(private val repo: PhoneByNameRepo) : P
     override fun afterInserts(rowCount: Int) {
     }
 
-    override fun insert(id: Long) {
+    override fun insert(id: Long): Boolean {
         repo.saveNewPhoneEntity(id)
+        return true
     }
 
     override fun select(id: Int) {

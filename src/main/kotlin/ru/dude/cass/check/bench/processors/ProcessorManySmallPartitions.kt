@@ -26,8 +26,9 @@ internal class ProcessorManySmallPartitions(private val repo: PhoneRepo) : Proce
     override fun afterInserts(rowCount: Int) {
     }
 
-    override fun insert(id: Long) {
+    override fun insert(id: Long): Boolean {
         repo.saveNewEntity(id)
+        return true
     }
 
     override fun select(id: Int) {

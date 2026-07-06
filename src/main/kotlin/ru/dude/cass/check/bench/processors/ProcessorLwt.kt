@@ -6,7 +6,6 @@ import ru.dude.cass.check.bench.BenchSet
 import ru.dude.cass.check.bench.ProcessorAbstract
 import ru.dude.cass.check.bench.Processors
 import ru.dude.cass.check.service.repo.PhoneCounterRepo
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.random.Random
 
 /**
@@ -19,8 +18,6 @@ internal class ProcessorLwt(private val repo: PhoneCounterRepo) : ProcessorAbstr
     override val name = Processors.lwt_bench
 
     override val tableName = repo.tableName()
-
-    private val repeatCounter = AtomicLong(0)
 
     @Volatile
     private var usedPartitions: Long = 0
@@ -43,17 +40,13 @@ internal class ProcessorLwt(private val repo: PhoneCounterRepo) : ProcessorAbstr
 
     }
 
-    override fun insert(id: Long) {
-
+    override fun insert(id: Long): Boolean {
         val rid = rand.nextLong(usedPartitions) + 1
-
-        while (!repo.incrementByLwtEntity(rid)){
-            repeatCounter.incrementAndGet()
-        }
+        val res = repo.incrementByLwtEntity(rid)
+        return res
     }
 
     override fun afterInserts(rowCount: Int) {
-        logger.info("Lwt strong concurrency for {}, repeatCounter: {}", rowCount,repeatCounter)
     }
 
     override fun select(id: Int) {

@@ -44,6 +44,7 @@ abstract class ProcessorAbstract(
     private val statPrevCnt = AtomicLong(0)
     private val counter = AtomicLong()
     private val counterOf = AtomicLong()
+    private val counterError = AtomicLong()
 
 
     val formatter = DecimalFormat("#,###", DecimalFormatSymbols.getInstance().also {
@@ -56,64 +57,82 @@ abstract class ProcessorAbstract(
             val delayMs = System.currentTimeMillis() - statSt.getAndSet(System.currentTimeMillis())
             val divCnt = counter.get() - statPrevCnt.getAndSet(counter.get())
             logger.info(
-                " {} of {} , {} ops/sec ",
+                " {} of {} , {} ops/sec, err: {} ",
                 formatter.format(counter),
                 formatter.format(counterOf),
-                divCnt * 1000 / delayMs
+                divCnt * 1000 / delayMs,
+                counterError.get()
             )
         }
 
     }
 
 
-    override fun runBenchInsert(insertCountInt: Int) {
+    override fun runBenchInsert(insertCountInt: Int): ProcessedResult {
 
         counter.set(0)
         counterOf.set(insertCountInt.toLong())
+        counterError.set(0)
 
         val idCounter = AtomicLong(0)
 
-        execSafetyMultithread({ counter.getAndIncrement() < insertCountInt }) {
+        execSafetyMultithread({ counter.get() < insertCountInt }) {
             insert(idCounter.getAndIncrement())
         }
 
-        counter.set(0)
+        return ProcessedResult(
+            counter.get().toInt(),
+            counterError.get().toInt()
+        ) .also {
+            counter.set(0)
+            counterOf.set(0)
+            counterError.set(0)
+        }
 
     }
 
-    override fun runBenchSelect(maxId: Int, selectTimeSec: Int): Int {
+    override fun runBenchSelect(maxId: Int, selectTimeSec: Int): ProcessedResult {
 
 
         val end = LocalDateTime.now().plusSeconds(selectTimeSec.toLong())
 
         counter.set(0)
         counterOf.set(0)
+        counterError.set(0)
 
         val r = Random(777)
         execSafetyMultithread({ LocalDateTime.now() <= end }) {
             select(r.nextInt(maxId))
-            counter.incrementAndGet()
+            true
         }
 
-        val res = counter.get()
 
-        counter.set(0)
-        counterOf.set(0)
-
-        return res.toInt()
+        return ProcessedResult(
+            counter.get().toInt(),
+            counterError.get().toInt()
+        ) .also {
+            counter.set(0)
+            counterOf.set(0)
+            counterError.set(0)
+        }
     }
 
-    private fun execSafetyMultithread(whileTrue: () -> Boolean, func: () -> Unit) {
+    private fun execSafetyMultithread(whileTrue: () -> Boolean, func: () -> Boolean) {
         val futures = (1..threadsCount).map {
             executor.submit {
                 while (whileTrue()) {
                     try {
-                        func()
+                        if (func()) {
+                            counter.incrementAndGet()
+                        } else {
+                            counterError.incrementAndGet()
+                        }
                     } catch (e: InterruptedException) {
-                        System.err.println("Exception: ${e.message}")
-                        break
+                        logger.error("Interrupted: {}", e.message)
+                        throw e
                     } catch (e: Exception) {
-                        System.err.println("Exception: ${e.message}")
+                        counterError.incrementAndGet()
+                        logger.warn("Exception: {}", e.message)
                     }
                 }
             }

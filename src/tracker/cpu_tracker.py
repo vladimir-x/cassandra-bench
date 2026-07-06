@@ -69,7 +69,7 @@ def measurement_loop():
             cpu_log_str = "ERROR"
 
         # 2. Сбор RAM (free -m)
-        result_ram = subprocess.run("free -m | awk '/Mem:/ {print $3}'", shell=True, capture_output=True, text=True)
+        result_ram = subprocess.run("LC_ALL=C free -m | awk '/Mem:/ {print $3}'", shell=True, capture_output=True, text=True)
         ram_str = result_ram.stdout.strip()
         
         try:
