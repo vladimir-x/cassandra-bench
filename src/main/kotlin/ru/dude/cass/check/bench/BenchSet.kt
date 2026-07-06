@@ -11,6 +11,7 @@ data class BenchSet(
     val tag: String = "",
     val insertCount: String = "1_000_000",
     val flushAfterInsert: Boolean = true,
+    val compactAfterInsert: Boolean = false,
     val selectTimeSec: Int = 10,
     val retry: Int = 1,
     val retrySelect: Int = 1,

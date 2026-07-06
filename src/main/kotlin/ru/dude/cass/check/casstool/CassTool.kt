@@ -253,7 +253,7 @@ class CassTool(propertyFilePath: String) {
 
     }
 
-    fun flushAndCompact(tableName: String) {
+    fun flush() {
 
         logger.info("${config.cassVersion} flush")
         try {
@@ -261,7 +261,8 @@ class CassTool(propertyFilePath: String) {
         } catch (e: Exception) {
             logger.error("Flush ${config.cassVersion} error: ${e.message}")
         }
-
+    }
+    fun compact(tableName: String) {
         logger.info("${config.cassVersion} compact $tableName")
         try{
             nodetool("compact ${config.cassKeyspaceName} $tableName")

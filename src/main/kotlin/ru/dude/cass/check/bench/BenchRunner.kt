@@ -75,7 +75,10 @@ internal class BenchRunner(
 
 
         if (benchSet.flushAfterInsert) {
-            CassTool.INSTANCE.flushAndCompact(benchProcessor.tableName)
+            CassTool.INSTANCE.flush()
+        }
+        if (benchSet.compactAfterInsert) {
+            CassTool.INSTANCE.compact(benchProcessor.tableName)
         }
 
         val discSize = CassTool.INSTANCE.tableOnDiscSizeMb(benchProcessor.tableName)
