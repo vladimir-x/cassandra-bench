@@ -19,6 +19,7 @@ internal class BenchRunner(
     private val runContext: RunContext,
     private val benchProcessors: List<Benchable>,
     private val cpuTracker: CpuTrackerClient,
+    private val csvResultWriter: CsvResultWriter,
 ) {
 
     companion object {
@@ -95,11 +96,30 @@ internal class BenchRunner(
             contextInfo
         )
 
+        csvResultWriter.appendLine(
+            "inserts",
+            benchSet.name,
+            benchSet.tag,
+            rowCount,
+            speed,
+            discSize,
+            runContext.threadsCount,
+            runContext.cassVersion,
+
+            cpuMetrics?.cpuAverageTotal,
+            cpuMetrics?.ramAverageMb,
+            cpuMetrics?.ramAverageMb,
+        )
+
     }
 
     private fun runOneTrySelect(benchProcessor: Benchable, benchSet: BenchSet, rowCount: Int, tryCount: Int) {
 
         logger.info("Running [{}], select-retry {} of {} ", benchSet.name, tryCount, benchSet.retrySelect)
+
+
+        cpuTracker.startMeasurement()
+
         val st = LocalDateTime.now()
 
         val selectCount = benchProcessor.runBenchSelect(rowCount, benchSet.selectTimeSec)
@@ -107,12 +127,30 @@ internal class BenchRunner(
         val d = Duration.between(st, LocalDateTime.now())
         val speed = selectCount / max(1, d.toSeconds())
 
+        val cpuMetrics = cpuTracker.stopMeasurement()
+
         summaryLogger.info(
             "Bench complete | selects | name: [{}]\t| rowCount: {}\t| speed: {}\tsel/sec\t| context: {}",
             benchSet.name,
             rowCount,
             speed,
             runContext.getContextInfo()
+        )
+
+
+        csvResultWriter.appendLine(
+            "selects",
+            benchSet.name,
+            benchSet.tag,
+            rowCount,
+            speed,
+            0,
+            runContext.threadsCount,
+            runContext.cassVersion,
+
+            cpuMetrics?.cpuAverageTotal,
+            cpuMetrics?.ramAverageMb,
+            cpuMetrics?.ramAverageMb,
         )
 
 

@@ -1,5 +1,6 @@
 package ru.dude.cass.check.tracker
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -9,6 +10,9 @@ import java.time.Duration
 internal class CpuTrackerClient(
     @Value("\${casstool.tracker.url:}") private val trackerUrl: String
 ) {
+
+    private val logger = LoggerFactory.getLogger(CpuTrackerClient::class.java)
+
     // Создаем WebClient с базовым URL трекера
     private val webClient = WebClient.builder()
         .baseUrl(trackerUrl)
@@ -18,22 +22,33 @@ internal class CpuTrackerClient(
      * Отправляет GET /start для запуска мониторинга
      */
     fun startMeasurement(): TrackerResponse? {
-        return webClient.get()
-            .uri("/start")
-            .retrieve()
-            .bodyToMono(TrackerResponse::class.java)
-            // Задаем таймаут на случай, если Linux-сервер недоступен
-            .block(Duration.ofSeconds(5))
+        try {
+            return webClient.get()
+                .uri("/start")
+                .retrieve()
+                .bodyToMono(TrackerResponse::class.java)
+                // Задаем таймаут на случай, если Linux-сервер недоступен
+                .block(Duration.ofSeconds(5))
+        } catch (e: Exception) {
+            logger.info("Exception occurred while trying to start tracker {}: {}", trackerUrl, e.message)
+            return null
+        }
+
     }
 
     /**
      * Отправляет GET /stop, завершает мониторинг и возвращает метрики
      */
     fun stopMeasurement(): TrackerResponse? {
-        return webClient.get()
-            .uri("/stop")
-            .retrieve()
-            .bodyToMono(TrackerResponse::class.java)
-            .block(Duration.ofSeconds(5))
+        try {
+            return webClient.get()
+                .uri("/stop")
+                .retrieve()
+                .bodyToMono(TrackerResponse::class.java)
+                .block(Duration.ofSeconds(5))
+        } catch (e: Exception) {
+            logger.info("Exception occurred while trying to stop tracker {}: {}", trackerUrl, e.message)
+            return null
+        }
     }
 }
